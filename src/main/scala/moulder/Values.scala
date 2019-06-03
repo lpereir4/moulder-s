@@ -1,13 +1,14 @@
 package moulder
 
 import moulder.values._
+import scala.language.implicitConversions
 
 object Values {
-  implicit def fn2value[A](f: Function0[Option[A]]) = new Value[A] {
-    def apply() = f()
+  implicit def fn2value[A](f: () => Option[A]): Value[A] = new Value[A] {
+    def apply(): Option[A] = f()
   }
 
-  implicit def any2value[A](v: A) = new Value[A] {
+  implicit def any2value[A](v: A): Value[A] = new Value[A] {
     def apply() = Some(v)
   }
 

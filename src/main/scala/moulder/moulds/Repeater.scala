@@ -21,17 +21,18 @@ case class Repeater[A](private val items: Value[List[A]], private val mould: (A,
   //  }
 
   private def handleData(element: Element, data: List[A]): List[Node] = {
-    for ((item, index) <- data.zip(0 until data.length);
+    for ((item, index) <- data.zipWithIndex;
          elementCopy = List(copy(element));
          produced <- MouldersApplier.applyMoulders(mould(item, index), elementCopy)
     ) yield produced
   }
 
   private def copy(e: Element) = {
-    import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
-    val res = e.ownerDocument().createElement(e.tagName())
-    e.attributes().foreach(a => res.attr(a.getKey(), a.getValue()))
+    val res: Element = e.ownerDocument().createElement(e.tagName())
+    asScalaIterator(e.attributes().iterator())
+      .foreach(a => res.attr(a.getKey, a.getValue))
     res.html(e.html())
     res
   }

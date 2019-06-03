@@ -1,24 +1,20 @@
 package moulder
 
-import scala.collection.JavaConversions._
-
+import collection.JavaConverters._
 import org.specs2.mutable.Specification
-import org.specs2.mock.Mockito
 import org.mockito.ArgumentCaptor
-
 import org.custommonkey.xmlunit.XMLUnit
-
 import org.jsoup.Jsoup
 import org.jsoup.nodes._
-
 import java.io.StringReader
 
 import moulds._
+import org.specs2.mock.Mockito
 
 class MouldersSpec extends Specification with Mockito {
 
   "SubMoulder" should {
-    XMLUnit.setIgnoreWhitespace(true);
+    XMLUnit.setIgnoreWhitespace(true)
     val document = Jsoup.parseBodyFragment("<html><body><outer a='v'><a>test</a></outer></body></html>")
 
     val element = document.getElementsByTag("outer").first()
@@ -29,12 +25,12 @@ class MouldersSpec extends Specification with Mockito {
     val edc = ArgumentCaptor.forClass(classOf[Element])
     moulder.process(edc.capture()) returns List(parseNode("<b>text</b>"), parseNode("text"))
 
-    val sm = new SubMoulder().register("a", List(moulder))
+    val sm = SubMoulder().register("a", List(moulder))
 
     val processed = sm.process(element)
 
     "call its registered moulder with the correct params" in {
-      subElement must_== edc.getValue()
+      subElement must_== edc.getValue
     }
 
     "apply its registered moulder result" in {
@@ -44,7 +40,7 @@ class MouldersSpec extends Specification with Mockito {
   }
 
   "Appender" should {
-    XMLUnit.setIgnoreWhitespace(true);
+    XMLUnit.setIgnoreWhitespace(true)
     val document = Jsoup.parseBodyFragment("<html><body><outer>test</outer></body></html>")
 
     val element = document.getElementsByTag("outer").first()
@@ -67,7 +63,7 @@ class MouldersSpec extends Specification with Mockito {
   }
 
   "Prepender" should {
-    XMLUnit.setIgnoreWhitespace(true);
+    XMLUnit.setIgnoreWhitespace(true)
     val document = Jsoup.parseBodyFragment("<html><body><outer>test</outer></body></html>")
 
     val element = document.getElementsByTag("outer").first()
@@ -90,7 +86,7 @@ class MouldersSpec extends Specification with Mockito {
   }
 
   "ChildAppender" should {
-    XMLUnit.setIgnoreWhitespace(true);
+    XMLUnit.setIgnoreWhitespace(true)
     val document = Jsoup.parseBodyFragment("<html><body><outer>test<b a='v'>t</b>s</outer></body></html>")
 
     val element = document.getElementsByTag("outer").first()
@@ -113,7 +109,7 @@ class MouldersSpec extends Specification with Mockito {
   }
 
   "ChildPrepender" should {
-    XMLUnit.setIgnoreWhitespace(true);
+    XMLUnit.setIgnoreWhitespace(true)
     val document = Jsoup.parseBodyFragment("<html><body><outer>test<b a='v'>t</b>s</outer></body></html>")
 
     val element = document.getElementsByTag("outer").first()
@@ -136,7 +132,7 @@ class MouldersSpec extends Specification with Mockito {
   }
 
   "Remover" should {
-    XMLUnit.setIgnoreWhitespace(true);
+    XMLUnit.setIgnoreWhitespace(true)
 
 
     "Given a value that returns true" in {
@@ -181,7 +177,7 @@ class MouldersSpec extends Specification with Mockito {
   }
 
   "Replacer" should {
-    XMLUnit.setIgnoreWhitespace(true);
+    XMLUnit.setIgnoreWhitespace(true)
 
 
     "Given a value that returns something" in {
@@ -228,7 +224,7 @@ class MouldersSpec extends Specification with Mockito {
   }
 
   "Repeater" should {
-    XMLUnit.setIgnoreWhitespace(true);
+    XMLUnit.setIgnoreWhitespace(true)
 
 
     "Given an None value" in {
@@ -239,7 +235,7 @@ class MouldersSpec extends Specification with Mockito {
       val items = mock[Value[List[Int]]]
       items.apply() returns None
 
-      val a = Repeater(items, (item: Int, index: Int) => Nil)
+      val a = Repeater(items, (_: Int, _: Int) => Nil)
 
       val processed = a.process(element)
 
@@ -261,7 +257,7 @@ class MouldersSpec extends Specification with Mockito {
       val items = mock[Value[List[Int]]]
       items.apply() returns Some(Nil)
 
-      val a = Repeater(items, (item: Int, index: Int) => Nil)
+      val a = Repeater(items, (_: Int, _: Int) => Nil)
 
       val processed = a.process(element)
 
@@ -284,7 +280,7 @@ class MouldersSpec extends Specification with Mockito {
       val items = mock[Value[List[Int]]]
       items.apply() returns Some(list)
 
-      val a = Repeater(items, (item: Int, index: Int) => Nil)
+      val a = Repeater(items, (_: Int, _: Int) => Nil)
 
       val processed = a.process(element)
 
@@ -322,7 +318,7 @@ class MouldersSpec extends Specification with Mockito {
   }
 
   "AttrModifier" should {
-    XMLUnit.setIgnoreWhitespace(true);
+    XMLUnit.setIgnoreWhitespace(true)
 
     "Given a value that returns something" in {
       val document = Jsoup.parseBodyFragment("<html><body><outer a='v'>test</outer></body></html>")
@@ -373,7 +369,7 @@ class MouldersSpec extends Specification with Mockito {
   }
 
   "Texter" should {
-    XMLUnit.setIgnoreWhitespace(true);
+    XMLUnit.setIgnoreWhitespace(true)
     val document = Jsoup.parseBodyFragment("<html><body><outer>test<b a='v'>t</b>s</outer></body></html>")
 
     val element = document.getElementsByTag("outer").first()
@@ -396,7 +392,7 @@ class MouldersSpec extends Specification with Mockito {
   }
 
   "Nop" should {
-    XMLUnit.setIgnoreWhitespace(true);
+    XMLUnit.setIgnoreWhitespace(true)
     val document = Jsoup.parseBodyFragment("<html><body><outer>test<b a='v'>t</b>s</outer></body></html>")
 
     val element = document.getElementsByTag("outer").first()
@@ -413,7 +409,7 @@ class MouldersSpec extends Specification with Mockito {
 
   private def parse(s: String): List[Node] = {
     val d = Jsoup.parseBodyFragment(s)
-    new JListWrapper(d.body().childNodes()).toList
+    asScalaIterator[Node](d.body().childNodes().iterator()).toList
   }
 
   def parseNode(s: String): Node = {
